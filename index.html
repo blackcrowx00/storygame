@@ -1,245 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blind Story</title>
 
 <style>
-  body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #111;
-    color: #fff;
-    margin: 0;
-    padding: 0;
-  }
-
-  .container {
-    max-width: 600px;
-    margin: auto;
-    padding: 16px;
-  }
-
-  h1, h2 {
-    text-align: center;
-    margin-bottom: 8px;
-  }
-
-  .card {
-    background: #1c1c1c;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-
-  textarea {
-    width: 100%;
-    height: 120px;
-    border-radius: 8px;
-    border: none;
-    padding: 12px;
-    font-size: 16px;
-    resize: none;
-  }
-
-  button {
-    width: 100%;
-    padding: 14px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
-    background: #4caf50;
-    color: #000;
-    font-weight: bold;
-    margin-top: 12px;
-  }
-
-  button.secondary {
-    background: #2196f3;
-    color: #fff;
-  }
-
-  button.danger {
-    background: #e53935;
-    color: #fff;
-  }
-
-  select {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 8px;
-    margin-top: 12px;
-  }
-
-  .info {
-    font-size: 14px;
-    opacity: 0.85;
-    margin-top: 8px;
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  .story {
-    white-space: pre-wrap;
-    line-height: 1.5;
-    font-size: 17px;
-  }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background:#111;
+  color:#fff;
+  margin:0;
+}
+.container {
+  max-width:600px;
+  margin:auto;
+  padding:16px;
+}
+.card {
+  background:#1c1c1c;
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:16px;
+}
+h1,h2,h3 { text-align:center; }
+textarea {
+  width:100%;
+  height:120px;
+  border-radius:8px;
+  padding:12px;
+  font-size:16px;
+}
+button {
+  width:100%;
+  padding:16px;
+  margin-top:12px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+}
+.primary { background:#4caf50; }
+.secondary { background:#2196f3; color:#fff; }
+.danger { background:#e53935; color:#fff; }
+.hidden { display:none; }
+.info { font-size:14px; opacity:.85; margin-top:8px; }
+.big-pass {
+  font-size:28px;
+  padding:40px;
+  background:#000;
+}
+.fade-sentence {
+  opacity:0;
+  animation: fadeIn 1s forwards;
+}
+@keyframes fadeIn {
+  to { opacity:1; }
+}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-  <h1>Blind Story</h1>
+<h1>Blind Story</h1>
 
-  <!-- START SCREEN -->
-  <div id="start" class="card">
-    <h2>Choose Number of Rounds</h2>
-    <p class="info" style="text-align:center;">
-      Each round = 2 turns per player
-    </p>
+<!-- START -->
+<div id="start" class="card">
+  <h2>Setup</h2>
 
-    <select id="roundSelect">
-      <option value="2">2 Rounds Each (4 turns)</option>
-      <option value="3">3 Rounds Each (6 turns)</option>
-      <option value="4">4 Rounds Each (8 turns)</option>
-    </select>
+  <label>Rounds per player</label>
+  <select id="roundSelect">
+    <option value="2">2 each (4 turns)</option>
+    <option value="3">3 each (6 turns)</option>
+    <option value="4">4 each (8 turns)</option>
+  </select>
 
-    <button onclick="startGame()">Start Game</button>
-  </div>
+  <label class="info">
+    <input type="checkbox" id="usePrompt" checked> Start with a random prompt
+  </label>
 
-  <!-- GAME -->
-  <div id="game" class="card hidden">
-    <h2 id="turnTitle"></h2>
-    <div id="context" class="info"></div>
+  <label>Narrator voice</label>
+  <select id="voiceSelect"></select>
 
-    <textarea id="input" placeholder="Write your part..."></textarea>
-    <div class="info" id="counter"></div>
+  <label class="info">
+    <input type="checkbox" id="ambientToggle"> Ambient sound
+  </label>
 
-    <button onclick="submitTurn()">Submit</button>
-    <button class="danger" onclick="confirmReset()">Reset Game</button>
-  </div>
+  <button class="primary" onclick="startGame()">Start Game</button>
+</div>
 
-  <!-- END -->
-  <div id="end" class="card hidden">
-    <h2>The Full Story</h2>
-    <div class="story" id="fullStory"></div>
+<!-- PASS PHONE -->
+<div id="pass" class="card hidden">
+  <h2>Pass the phone</h2>
+  <button class="big-pass primary" onclick="continueAfterPass()">HAND OVER PHONE</button>
+</div>
 
-    <button class="secondary" onclick="readStory()">🔊 Read Aloud</button>
-    <button onclick="resetGame()">🔁 Play Again</button>
-  </div>
+<!-- GAME -->
+<div id="game" class="card hidden">
+  <h2 id="turnTitle"></h2>
+  <div id="context" class="info"></div>
+
+  <textarea id="input"></textarea>
+  <div class="info" id="counter"></div>
+
+  <button class="primary" onclick="submitTurn()">Submit</button>
+  <button class="danger" onclick="resetGame()">Reset</button>
+</div>
+
+<!-- END -->
+<div id="end" class="card hidden">
+  <h2 id="storyTitle"></h2>
+  <div id="fullStory"></div>
+
+  <button class="secondary" onclick="readStory()">🔊 Read Aloud</button>
+  <button class="primary" onclick="resetGame()">🔁 Play Again</button>
+</div>
+
+<audio id="ambient" loop>
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_4f0c6a3c7c.mp3">
+</audio>
 
 </div>
 
 <script>
-  const MAX_CHARS = 255;
-  const MAX_SENTENCES = 4;
+const MAX_CHARS = 255, MAX_SENTENCES = 4;
+let rounds = 2, TOTAL_TURNS = 4;
+let turns = [], currentTurn = 0;
+let voices = [];
 
-  let rounds = 2;
-  let TOTAL_TURNS = 4;
+const prompts = [
+  "It was the last night before everything changed.",
+  "The message was meant for someone else.",
+  "Nobody noticed the door was already open.",
+  "This was not how the story was supposed to end."
+];
 
-  let turns = [];
-  let currentTurn = 0;
+speechSynthesis.onvoiceschanged = () => {
+  voices = speechSynthesis.getVoices();
+  const sel = document.getElementById("voiceSelect");
+  sel.innerHTML = voices.map((v,i)=>`<option value="${i}">${v.name}</option>`).join("");
+};
 
-  const input = document.getElementById("input");
-  const counter = document.getElementById("counter");
-  const context = document.getElementById("context");
-  const turnTitle = document.getElementById("turnTitle");
-
-  function startGame() {
-    rounds = parseInt(document.getElementById("roundSelect").value, 10);
-    TOTAL_TURNS = rounds * 2;
-
-    turns = [];
-    currentTurn = 0;
-
-    document.getElementById("start").classList.add("hidden");
-    document.getElementById("game").classList.remove("hidden");
-
-    updateTurnUI();
-  }
-
-  function sentenceCount(text) {
-    const matches = text.match(/[.!?]+/g);
-    return matches ? matches.length : 0;
-  }
-
-  function updateCounter() {
-    counter.textContent =
-      `${input.value.length}/${MAX_CHARS} characters · ` +
-      `${sentenceCount(input.value)}/${MAX_SENTENCES} sentences`;
-  }
-
-  input.addEventListener("input", updateCounter);
-
-  function getPartialText(text) {
-    const sentences = text.match(/[^.!?]+[.!?]/g);
-    const lastSentence = sentences ? sentences[sentences.length - 1].trim() : "";
-    const last40 = text.slice(-40);
-    return lastSentence.length >= 40 ? lastSentence : last40;
-  }
-
-  function updateTurnUI() {
-    const player = currentTurn % 2 === 0 ? 1 : 2;
-    turnTitle.textContent =
-      `Player ${player} — Turn ${currentTurn + 1}/${TOTAL_TURNS}`;
-
-    context.textContent = turns.length === 0
-      ? "You are starting the story."
-      : "You only see this from the previous turn:\n\n“" +
-        getPartialText(turns[turns.length - 1]) +
-        "”";
-
-    input.value = "";
-    updateCounter();
-  }
-
-  function submitTurn() {
-    const text = input.value.trim();
-
-    if (!text) return alert("Please write something.");
-    if (text.length > MAX_CHARS) return alert("Too many characters.");
-    if (sentenceCount(text) > MAX_SENTENCES) return alert("Too many sentences.");
-
-    turns.push(text);
-    currentTurn++;
-
-    currentTurn >= TOTAL_TURNS ? endGame() : updateTurnUI();
-  }
-
-  function endGame() {
-    document.getElementById("game").classList.add("hidden");
-    document.getElementById("end").classList.remove("hidden");
-    document.getElementById("fullStory").textContent = turns.join(" ");
-  }
-
-  function readStory() {
-    const utterance = new SpeechSynthesisUtterance(
-      document.getElementById("fullStory").textContent
-    );
-    utterance.rate = 0.95;
-    utterance.lang = "en-US";
-    speechSynthesis.speak(utterance);
-  }
-
-  function confirmReset() {
-    if (confirm("Reset the game and lose current progress?")) {
-      resetGame();
-    }
-  }
-
-  function resetGame() {
-    turns = [];
-    currentTurn = 0;
-
-    document.getElementById("game").classList.add("hidden");
-    document.getElementById("end").classList.add("hidden");
-    document.getElementById("start").classList.remove("hidden");
-  }
-</script>
-</body>
-</html>
-
+function startGame() {
+  rounds = +roundSelect.value;
+  TOTAL_TURNS = rounds * 2;
+  tu
