@@ -40,3 +40,208 @@
     padding: 12px;
     font-size: 16px;
     resize: none;
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #4caf50;
+    color: #000;
+    font-weight: bold;
+    margin-top: 12px;
+  }
+
+  button.secondary {
+    background: #2196f3;
+    color: #fff;
+  }
+
+  select {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-top: 12px;
+  }
+
+  .info {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-top: 8px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .story {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    font-size: 17px;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>Blind Story</h1>
+
+  <!-- START SCREEN -->
+  <div id="start" class="card">
+    <h2>Choose Rounds</h2>
+    <p class="info" style="text-align:center;">
+      Each round = 2 turns per player
+    </p>
+
+    <select id="roundSelect">
+      <option value="2">2 Rounds (8 turns)</option>
+      <option value="3">3 Rounds (12 turns)</option>
+      <option value="4">4 Rounds (16 turns)</option>
+    </select>
+
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" class="card hidden">
+    <h2 id="turnTitle"></h2>
+    <div id="context" class="info"></div>
+
+    <textarea id="input" placeholder="Write your part..."></textarea>
+    <div class="info" id="counter"></div>
+
+    <button onclick="submitTurn()">Submit</button>
+  </div>
+
+  <!-- END -->
+  <div id="end" class="card hidden">
+    <h2>The Full Story</h2>
+    <div class="story" id="fullStory"></div>
+
+    <button class="secondary" onclick="readStory()">🔊 Read Aloud</button>
+    <button onclick="resetGame()">🔁 Play Again</button>
+  </div>
+
+</div>
+
+<script>
+  const MAX_CHARS = 255;
+  const MAX_SENTENCES = 4;
+
+  let rounds = 2;
+  let TOTAL_TURNS = 8;
+
+  let turns = [];
+  let currentTurn = 0;
+
+  const input = document.getElementById("input");
+  const counter = document.getElementById("counter");
+  const context = document.getElementById("context");
+  const turnTitle = document.getElementById("turnTitle");
+
+  function startGame() {
+    rounds = parseInt(document.getElementById("roundSelect").value, 10);
+    TOTAL_TURNS = rounds * 4;
+
+    document.getElementById("start").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+
+    updateTurnUI();
+  }
+
+  function sentenceCount(text) {
+    const matches = text.match(/[.!?]+/g);
+    return matches ? matches.length : 0;
+  }
+
+  function updateCounter() {
+    const chars = input.value.length;
+    const sentences = sentenceCount(input.value);
+    counter.textContent =
+      `${chars}/${MAX_CHARS} characters · ${sentences}/${MAX_SENTENCES} sentences`;
+  }
+
+  input.addEventListener("input", updateCounter);
+
+  function getPartialText(text) {
+    const sentences = text.match(/[^.!?]+[.!?]/g);
+    let lastSentence = sentences ? sentences[sentences.length - 1].trim() : "";
+    let last40 = text.slice(-40);
+    return lastSentence.length >= 40 ? lastSentence : last40;
+  }
+
+  function updateTurnUI() {
+    const player = currentTurn % 2 === 0 ? 1 : 2;
+    turnTitle.textContent =
+      `Player ${player} — Turn ${currentTurn + 1}/${TOTAL_TURNS}`;
+
+    if (turns.length === 0) {
+      context.textContent = "You are starting the story.";
+    } else {
+      context.textContent =
+        "You only see this from the previous turn:\n\n“" +
+        getPartialText(turns[turns.length - 1]) +
+        "”";
+    }
+
+    input.value = "";
+    updateCounter();
+  }
+
+  function submitTurn() {
+    const text = input.value.trim();
+
+    if (!text) {
+      alert("Please write something.");
+      return;
+    }
+
+    if (text.length > MAX_CHARS) {
+      alert("Too many characters.");
+      return;
+    }
+
+    if (sentenceCount(text) > MAX_SENTENCES) {
+      alert("Too many sentences.");
+      return;
+    }
+
+    turns.push(text);
+    currentTurn++;
+
+    if (currentTurn >= TOTAL_TURNS) {
+      endGame();
+    } else {
+      updateTurnUI();
+    }
+  }
+
+  function endGame() {
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("end").classList.remove("hidden");
+    document.getElementById("fullStory").textContent = turns.join(" ");
+  }
+
+  function readStory() {
+    const utterance = new SpeechSynthesisUtterance(
+      document.getElementById("fullStory").textContent
+    );
+    utterance.rate = 0.95;
+    utterance.lang = "en-US";
+    speechSynthesis.speak(utterance);
+  }
+
+  function resetGame() {
+    turns = [];
+    currentTurn = 0;
+
+    document.getElementById("end").classList.add("hidden");
+    document.getElementById("start").classList.remove("hidden");
+  }
+</script>
+</body>
+</html>
