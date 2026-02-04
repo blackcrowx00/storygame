@@ -59,6 +59,11 @@
     color: #fff;
   }
 
+  button.danger {
+    background: #e53935;
+    color: #fff;
+  }
+
   select {
     width: 100%;
     padding: 12px;
@@ -115,6 +120,7 @@
     <div class="info" id="counter"></div>
 
     <button onclick="submitTurn()">Submit</button>
+    <button class="danger" onclick="confirmReset()">Reset Game</button>
   </div>
 
   <!-- END -->
@@ -147,6 +153,9 @@
     rounds = parseInt(document.getElementById("roundSelect").value, 10);
     TOTAL_TURNS = rounds * 4;
 
+    turns = [];
+    currentTurn = 0;
+
     document.getElementById("start").classList.add("hidden");
     document.getElementById("game").classList.remove("hidden");
 
@@ -159,18 +168,17 @@
   }
 
   function updateCounter() {
-    const chars = input.value.length;
-    const sentences = sentenceCount(input.value);
     counter.textContent =
-      `${chars}/${MAX_CHARS} characters · ${sentences}/${MAX_SENTENCES} sentences`;
+      `${input.value.length}/${MAX_CHARS} characters · ` +
+      `${sentenceCount(input.value)}/${MAX_SENTENCES} sentences`;
   }
 
   input.addEventListener("input", updateCounter);
 
   function getPartialText(text) {
     const sentences = text.match(/[^.!?]+[.!?]/g);
-    let lastSentence = sentences ? sentences[sentences.length - 1].trim() : "";
-    let last40 = text.slice(-40);
+    const lastSentence = sentences ? sentences[sentences.length - 1].trim() : "";
+    const last40 = text.slice(-40);
     return lastSentence.length >= 40 ? lastSentence : last40;
   }
 
@@ -179,14 +187,11 @@
     turnTitle.textContent =
       `Player ${player} — Turn ${currentTurn + 1}/${TOTAL_TURNS}`;
 
-    if (turns.length === 0) {
-      context.textContent = "You are starting the story.";
-    } else {
-      context.textContent =
-        "You only see this from the previous turn:\n\n“" +
+    context.textContent = turns.length === 0
+      ? "You are starting the story."
+      : "You only see this from the previous turn:\n\n“" +
         getPartialText(turns[turns.length - 1]) +
         "”";
-    }
 
     input.value = "";
     updateCounter();
@@ -195,29 +200,14 @@
   function submitTurn() {
     const text = input.value.trim();
 
-    if (!text) {
-      alert("Please write something.");
-      return;
-    }
-
-    if (text.length > MAX_CHARS) {
-      alert("Too many characters.");
-      return;
-    }
-
-    if (sentenceCount(text) > MAX_SENTENCES) {
-      alert("Too many sentences.");
-      return;
-    }
+    if (!text) return alert("Please write something.");
+    if (text.length > MAX_CHARS) return alert("Too many characters.");
+    if (sentenceCount(text) > MAX_SENTENCES) return alert("Too many sentences.");
 
     turns.push(text);
     currentTurn++;
 
-    if (currentTurn >= TOTAL_TURNS) {
-      endGame();
-    } else {
-      updateTurnUI();
-    }
+    currentTurn >= TOTAL_TURNS ? endGame() : updateTurnUI();
   }
 
   function endGame() {
@@ -235,10 +225,17 @@
     speechSynthesis.speak(utterance);
   }
 
+  function confirmReset() {
+    if (confirm("Reset the game and lose current progress?")) {
+      resetGame();
+    }
+  }
+
   function resetGame() {
     turns = [];
     currentTurn = 0;
 
+    document.getElementById("game").classList.add("hidden");
     document.getElementById("end").classList.add("hidden");
     document.getElementById("start").classList.remove("hidden");
   }
