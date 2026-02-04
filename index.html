@@ -12,7 +12,6 @@ body { background:#111; color:#fff; font-family:system-ui; margin:0; }
 textarea { width:100%; height:120px; padding:12px; font-size:16px; }
 button { width:100%; padding:16px; margin-top:12px; font-size:18px; }
 .hidden { display:none; }
-.big { font-size:28px; padding:40px; }
 </style>
 </head>
 
@@ -22,74 +21,28 @@ button { width:100%; padding:16px; margin-top:12px; font-size:18px; }
 <h1>Blind Story</h1>
 
 <div id="start" class="card">
-  <label>Rounds per player</label>
-  <select id="rounds">
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-  </select>
+  <label><input type="checkbox" id="sound"> Ambient sound</label>
   <button onclick="startGame()">Start</button>
 </div>
 
-<div id="pass" class="card hidden">
-  <h2>Pass the phone</h2>
-  <button class="big" onclick="continueGame()">HAND OVER PHONE</button>
-</div>
-
 <div id="game" class="card hidden">
-  <h2 id="turn"></h2>
-  <div id="context"></div>
   <textarea id="input"></textarea>
   <button onclick="submit()">Submit</button>
 </div>
 
-<div id="end" class="card hidden">
-  <h2>Story</h2>
-  <pre id="story"></pre>
-  <button onclick="reset()">Play Again</button>
-</div>
+<audio id="ambient" loop>
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_4f0c6a3c7c.mp3">
+</audio>
 
 </div>
 
 <script>
-let turns=[], current=0, total=4;
-
 function startGame(){
-  total = +rounds.value * 2;
+  if(sound.checked) ambient.play();
   start.classList.add("hidden");
-  pass.classList.remove("hidden");
-}
-
-function continueGame(){
-  pass.classList.add("hidden");
   game.classList.remove("hidden");
-  update();
 }
-
-function update(){
-  const p = current % 2 ? 2 : 1;
-  turn.textContent = `Player ${p} — Turn ${current+1}/${total}`;
-  context.textContent = turns.length
-    ? "You see: “" + turns.at(-1).slice(-40) + "”"
-    : "Start the story.";
-  input.value="";
-}
-
-function submit(){
-  turns.push(input.value.trim());
-  current++;
-  game.classList.add("hidden");
-  current >= total ? endGame() : pass.classList.remove("hidden");
-}
-
-function endGame(){
-  end.classList.remove("hidden");
-  story.textContent = turns.join(" ");
-}
-
-function reset(){
-  location.reload();
-}
+function submit(){ alert("Turn submitted"); }
 </script>
 </body>
 </html>
