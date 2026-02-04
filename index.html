@@ -97,15 +97,15 @@
 
   <!-- START SCREEN -->
   <div id="start" class="card">
-    <h2>Choose Rounds</h2>
+    <h2>Choose Number of Rounds</h2>
     <p class="info" style="text-align:center;">
       Each round = 2 turns per player
     </p>
 
     <select id="roundSelect">
-      <option value="2">2 Rounds (8 turns)</option>
-      <option value="3">3 Rounds (12 turns)</option>
-      <option value="4">4 Rounds (16 turns)</option>
+      <option value="2">2 Rounds Each (4 turns)</option>
+      <option value="3">3 Rounds Each (6 turns)</option>
+      <option value="4">4 Rounds Each (8 turns)</option>
     </select>
 
     <button onclick="startGame()">Start Game</button>
@@ -139,7 +139,7 @@
   const MAX_SENTENCES = 4;
 
   let rounds = 2;
-  let TOTAL_TURNS = 8;
+  let TOTAL_TURNS = 4;
 
   let turns = [];
   let currentTurn = 0;
@@ -151,7 +151,7 @@
 
   function startGame() {
     rounds = parseInt(document.getElementById("roundSelect").value, 10);
-    TOTAL_TURNS = rounds * 4;
+    TOTAL_TURNS = rounds * 2;
 
     turns = [];
     currentTurn = 0;
@@ -242,3 +242,4 @@
 </script>
 </body>
 </html>
+
