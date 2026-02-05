@@ -136,4 +136,204 @@ select {
   <h2>Choose Rounds</h2>
   <select id="roundSelect">
     <option value="2">2 rounds each (4 turns)</option>
-    <option value="3">3 r
+    <option value="3">3 rounds each (6 turns)</option>
+    <option value="4">4 rounds each (8 turns)</option>
+  </select>
+  <button id="startBtn">Start Game</button>
+</div>
+
+<!-- PASS -->
+<div id="pass" class="card hidden">
+  <h2>Pass the phone</h2>
+  <p class="info" style="text-align:center;">
+    Hand the phone to the next player.<br>
+    Tap when ready.
+  </p>
+  <button class="pass-btn" id="continueBtn">HAND OVER PHONE</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="card hidden">
+  <h2 id="turnTitle"></h2>
+  <div id="context" class="info"></div>
+
+  <textarea id="input" placeholder="Write your part..."></textarea>
+  <div id="counter" class="info"></div>
+
+  <button id="submitBtn">Submit</button>
+  <button class="danger" id="resetBtn">Reset Game</button>
+</div>
+
+<!-- END -->
+<div id="end" class="card hidden">
+  <h2>The Full Story</h2>
+
+  <div id="fullStory"></div>
+  <div id="cleanStory" class="clean-view hidden"></div>
+
+  <button class="secondary" id="readBtn">🔊 Read Aloud</button>
+  <button class="neutral" id="toggleCleanBtn">🧼 Clean Share View</button>
+  <button id="playAgainBtn">🔁 Play Again</button>
+</div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const MAX_CHARS = 255;
+  const MAX_SENTENCES = 4;
+
+  let roundsPerPlayer = 2;
+  let TOTAL_TURNS = 4;
+  let turns = [];
+  let currentTurn = 0;
+  let cleanMode = false;
+
+  const start = document.getElementById("start");
+  const pass = document.getElementById("pass");
+  const game = document.getElementById("game");
+  const end = document.getElementById("end");
+
+  const input = document.getElementById("input");
+  const counter = document.getElementById("counter");
+  const context = document.getElementById("context");
+  const turnTitle = document.getElementById("turnTitle");
+
+  const fullStory = document.getElementById("fullStory");
+  const cleanStory = document.getElementById("cleanStory");
+
+  document.getElementById("startBtn").onclick = startGame;
+  document.getElementById("continueBtn").onclick = continueGame;
+  document.getElementById("submitBtn").onclick = submitTurn;
+  document.getElementById("resetBtn").onclick = confirmReset;
+  document.getElementById("playAgainBtn").onclick = resetGame;
+  document.getElementById("readBtn").onclick = readStory;
+  document.getElementById("toggleCleanBtn").onclick = toggleCleanView;
+
+  input.addEventListener("input", updateCounter);
+
+  function startGame() {
+    roundsPerPlayer = Number(document.getElementById("roundSelect").value);
+    TOTAL_TURNS = roundsPerPlayer * 2;
+    turns = [];
+    currentTurn = 0;
+
+    start.classList.add("hidden");
+    game.classList.remove("hidden");
+    updateTurnUI();
+  }
+
+  function continueGame() {
+    pass.classList.add("hidden");
+    game.classList.remove("hidden");
+    updateTurnUI();
+  }
+
+  function sentenceCount(text) {
+    return (text.match(/[.!?]+/g) || []).length;
+  }
+
+  function updateCounter() {
+    counter.textContent =
+      `${input.value.length}/${MAX_CHARS} characters · ` +
+      `${sentenceCount(input.value)}/${MAX_SENTENCES} sentences`;
+  }
+
+  function getPartialText(text) {
+    const cleaned = text.trim().replace(/\s+/g, " ");
+    const parts = cleaned.split(/(?<=[.!?])\s+/);
+
+    if (parts.length > 1 || /[.!?]$/.test(cleaned)) {
+      return parts[parts.length - 1];
+    }
+    return cleaned.slice(-45);
+  }
+
+  function updateTurnUI() {
+    const player = currentTurn % 2 === 0 ? 1 : 2;
+    turnTitle.textContent =
+      `Player ${player} — Turn ${currentTurn + 1}/${TOTAL_TURNS}`;
+
+    context.textContent = turns.length === 0
+      ? "You are starting the story."
+      : `You only see:\n\n“${getPartialText(turns[turns.length - 1])}”`;
+
+    input.value = "";
+    updateCounter();
+  }
+
+  function submitTurn() {
+    const text = input.value.trim();
+    if (!text) return alert("Please write something.");
+    if (text.length > MAX_CHARS) return alert("Too many characters.");
+    if (sentenceCount(text) > MAX_SENTENCES) return alert("Too many sentences.");
+
+    turns.push(text);
+    currentTurn++;
+    game.classList.add("hidden");
+
+    currentTurn >= TOTAL_TURNS
+      ? endGame()
+      : pass.classList.remove("hidden");
+  }
+
+  function endGame() {
+    end.classList.remove("hidden");
+    renderStory();
+  }
+
+  function renderStory() {
+    fullStory.innerHTML = "";
+    cleanStory.textContent = turns.join(" ");
+
+    turns.forEach((text, i) => {
+      const block = document.createElement("div");
+      block.className = `story-block ${i % 2 === 0 ? "player1" : "player2"}`;
+
+      const label = document.createElement("div");
+      label.className = "player-label";
+      label.textContent = `Player ${i % 2 === 0 ? 1 : 2}`;
+
+      const content = document.createElement("div");
+      content.textContent = text;
+
+      block.append(label, content);
+      fullStory.appendChild(block);
+    });
+  }
+
+  function toggleCleanView() {
+    cleanMode = !cleanMode;
+    fullStory.classList.toggle("hidden", cleanMode);
+    cleanStory.classList.toggle("hidden", !cleanMode);
+  }
+
+  function readStory() {
+    const u = new SpeechSynthesisUtterance(turns.join(" "));
+    u.rate = 0.95;
+    speechSynthesis.speak(u);
+  }
+
+  function confirmReset() {
+    if (confirm("Reset the game?")) resetGame();
+  }
+
+  function resetGame() {
+    turns = [];
+    currentTurn = 0;
+    cleanMode = false;
+
+    end.classList.add("hidden");
+    game.classList.add("hidden");
+    pass.classList.add("hidden");
+    start.classList.remove("hidden");
+
+    fullStory.classList.remove("hidden");
+    cleanStory.classList.add("hidden");
+  }
+
+});
+</script>
+</body>
+</html>
