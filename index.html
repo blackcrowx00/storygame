@@ -197,19 +197,12 @@ document.addEventListener("DOMContentLoaded", () => {
       `${input.value.length}/${MAX_CHARS} characters · ` +
       `${sentenceCount(input.value)}/${MAX_SENTENCES} sentences`;
   }
-function getPartialText(text) {
-  const cleaned = text.trim().replace(/\s+/g, " ");
 
-  const parts = cleaned.split(/(?<=[.!?])\s+/);
-
-  if (parts.length > 1 || /[.!?]$/.test(cleaned)) {
-    return parts[parts.length - 1];
-  }
-
-  return cleaned.slice(-45);
-}
-
-
+  function getPartialText(text) {
+    const sentences = text.match(/[^.!?]+[.!?]/g);
+    const lastSentence = sentences ? sentences[sentences.length - 1].trim() : "";
+    const last40 = text.slice(-40);
+    return lastSentence.length >= 40 ? lastSentence : last40;
   }
 
   function updateTurnUI() {
@@ -263,5 +256,3 @@ function getPartialText(text) {
 </script>
 </body>
 </html>
-
-
