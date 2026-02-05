@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blind Story</title>
 
 <style>
@@ -97,7 +97,7 @@ select {
 
 <h1>Blind Story</h1>
 
-<!-- START -->
+<!-- START SCREEN -->
 <div id="start" class="card">
   <h2>Choose Rounds</h2>
   <select id="roundSelect">
@@ -108,16 +108,17 @@ select {
   <button id="startBtn">Start Game</button>
 </div>
 
-<!-- PASS -->
+<!-- PASS THE PHONE -->
 <div id="pass" class="card hidden">
   <h2>Pass the phone</h2>
   <p class="info" style="text-align:center;">
-    Hand the phone to the next player.
+    Hand the phone to the next player.<br>
+    Tap when ready.
   </p>
   <button class="pass-btn" id="continueBtn">HAND OVER PHONE</button>
 </div>
 
-<!-- GAME -->
+<!-- GAME SCREEN -->
 <div id="game" class="card hidden">
   <h2 id="turnTitle"></h2>
   <div id="context" class="info"></div>
@@ -129,7 +130,7 @@ select {
   <button class="danger" id="resetBtn">Reset Game</button>
 </div>
 
-<!-- END -->
+<!-- END SCREEN -->
 <div id="end" class="card hidden">
   <h2>The Full Story</h2>
   <div id="fullStory" class="story"></div>
@@ -143,14 +144,17 @@ select {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
+  /* ---------- CONSTANTS ---------- */
   const MAX_CHARS = 255;
   const MAX_SENTENCES = 4;
 
+  /* ---------- GAME STATE ---------- */
   let roundsPerPlayer = 2;
   let TOTAL_TURNS = 4;
   let turns = [];
   let currentTurn = 0;
 
+  /* ---------- DOM REFERENCES ---------- */
   const start = document.getElementById("start");
   const pass = document.getElementById("pass");
   const game = document.getElementById("game");
@@ -162,97 +166,4 @@ document.addEventListener("DOMContentLoaded", () => {
   const turnTitle = document.getElementById("turnTitle");
   const fullStory = document.getElementById("fullStory");
 
-  document.getElementById("startBtn").onclick = startGame;
-  document.getElementById("continueBtn").onclick = continueGame;
-  document.getElementById("submitBtn").onclick = submitTurn;
-  document.getElementById("resetBtn").onclick = confirmReset;
-  document.getElementById("playAgainBtn").onclick = resetGame;
-  document.getElementById("readBtn").onclick = readStory;
-
-  input.addEventListener("input", updateCounter);
-
-  function startGame() {
-  roundsPerPlayer = Number(document.getElementById("roundSelect").value);
-  TOTAL_TURNS = roundsPerPlayer * 2;
-  turns = [];
-  currentTurn = 0;
-
-  start.classList.add("hidden");
-  game.classList.remove("hidden");
-  updateTurnUI();
-}
-
-  function continueGame() {
-    pass.classList.add("hidden");
-    game.classList.remove("hidden");
-    updateTurnUI();
-  }
-
-  function sentenceCount(text) {
-    return (text.match(/[.!?]+/g) || []).length;
-  }
-
-  function updateCounter() {
-    counter.textContent =
-      `${input.value.length}/${MAX_CHARS} characters · ` +
-      `${sentenceCount(input.value)}/${MAX_SENTENCES} sentences`;
-  }
-
-  function getPartialText(text) {
-    const sentences = text.match(/[^.!?]+[.!?]/g);
-    const lastSentence = sentences ? sentences[sentences.length - 1].trim() : "";
-    const last40 = text.slice(-40);
-    return lastSentence.length >= 40 ? lastSentence : last40;
-  }
-
-  function updateTurnUI() {
-    const player = currentTurn % 2 === 0 ? 1 : 2;
-    turnTitle.textContent = `Player ${player} — Turn ${currentTurn + 1}/${TOTAL_TURNS}`;
-    context.textContent = turns.length === 0
-      ? "You are starting the story."
-      : `You see:\n\n“${getPartialText(turns[turns.length - 1])}”`;
-    input.value = "";
-    updateCounter();
-  }
-
-  function submitTurn() {
-    const text = input.value.trim();
-    if (!text) return alert("Please write something.");
-    if (text.length > MAX_CHARS) return alert("Too many characters.");
-    if (sentenceCount(text) > MAX_SENTENCES) return alert("Too many sentences.");
-
-    turns.push(text);
-    currentTurn++;
-    game.classList.add("hidden");
-
-    currentTurn >= TOTAL_TURNS ? endGame() : pass.classList.remove("hidden");
-  }
-
-  function endGame() {
-    end.classList.remove("hidden");
-    fullStory.textContent = turns.join(" ");
-  }
-
-  function readStory() {
-    const u = new SpeechSynthesisUtterance(fullStory.textContent);
-    u.rate = 0.95;
-    speechSynthesis.speak(u);
-  }
-
-  function confirmReset() {
-    if (confirm("Reset the game?")) resetGame();
-  }
-
-  function resetGame() {
-    turns = [];
-    currentTurn = 0;
-    end.classList.add("hidden");
-    game.classList.add("hidden");
-    pass.classList.add("hidden");
-    start.classList.remove("hidden");
-  }
-
-});
-</script>
-</body>
-</html>
+  /* ---------- EVENT*
