@@ -1,140 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Blind Story</title>
 
 <style>
-body {
-  background:#0f0f0f;
-  color:#fff;
-  font-family:system-ui, -apple-system;
-  margin:0;
-}
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #111;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+  }
 
-.container {
-  max-width:640px;
-  margin:auto;
-  padding:16px;
-}
+  .container {
+    max-width: 600px;
+    margin: auto;
+    padding: 16px;
+  }
 
-h1,h2 {
-  text-align:center;
-}
+  h1, h2 {
+    text-align: center;
+    margin-bottom: 8px;
+  }
 
-.card {
-  background:#1b1b1b;
-  padding:16px;
-  border-radius:14px;
-  margin-bottom:16px;
-}
+  .card {
+    background: #1c1c1c;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
 
-textarea {
-  width:100%;
-  height:140px;
-  padding:12px;
-  font-size:16px;
-  border-radius:10px;
-  border:none;
-  resize:none;
-}
+  textarea {
+    width: 100%;
+    height: 120px;
+    border-radius: 8px;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    resize: none;
+  }
 
-button {
-  width:100%;
-  padding:16px;
-  margin-top:12px;
-  font-size:18px;
-  border:none;
-  border-radius:12px;
-  background:#3b82f6;
-  color:white;
-}
+  button {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #4caf50;
+    color: #000;
+    font-weight: bold;
+    margin-top: 12px;
+  }
 
-button.secondary {
-  background:#333;
-}
+  button.secondary {
+    background: #2196f3;
+    color: #fff;
+  }
 
-.hidden {
-  display:none;
-}
+  button.danger {
+    background: #e53935;
+    color: #fff;
+  }
 
-.context {
-  opacity:0.75;
-  margin-bottom:12px;
-}
+  select {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-top: 12px;
+  }
 
-/* Fade-in reveal */
-.fade {
-  opacity:0;
-  animation:fadeIn 1s forwards;
-  margin-bottom:8px;
-}
+  .info {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-top: 8px;
+    white-space: pre-wrap;
+  }
 
-@keyframes fadeIn {
-  to { opacity:1; }
-}
+  .hidden {
+    display: none;
+  }
 
-/* Pass screen emphasis */
-.pass-btn {
-  font-size:24px;
-  padding:32px;
-}
+  .story {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    font-size: 17px;
+  }
+
+  /* Pass-the-phone emphasis */
+  .pass-btn {
+    font-size: 22px;
+    padding: 28px;
+  }
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<h1>Blind Story</h1>
+  <h1>Blind Story</h1>
 
-<!-- START SCREEN -->
-<div id="start" class="card">
-  <label>Rounds per player</label>
-  <select id="rounds">
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-  </select>
+  <!-- START SCREEN -->
+  <div id="start" class="card">
+    <h2>Choose Rounds</h2>
+    <p class="info" style="text-align:center;">
+      Rounds per player
+    </p>
 
-  <label style="display:block;margin-top:12px;">
-    <input type="checkbox" id="usePrompt" checked>
-    Use opening prompt
-  </label>
+    <select id="roundSelect">
+      <option value="2">2 rounds each (4 turns)</option>
+      <option value="3">3 rounds each (6 turns)</option>
+      <option value="4">4 rounds each (8 turns)</option>
+    </select>
 
-  <button onclick="startGame()">Start Game</button>
-</div>
+    <button onclick="startGame()">Start Game</button>
+  </div>
 
-<!-- PASS THE PHONE SCREEN -->
-<div id="pass" class="card hidden">
-  <h2>Pass the phone</h2>
-  <p style="text-align:center;opacity:0.7;">
-    Hand the phone to the next player.<br>
-    Tap when ready.
-  </p>
-  <button class="pass-btn" onclick="continueGame()">HAND OVER PHONE</button>
-</div>
+  <!-- PASS THE PHONE -->
+  <div id="pass" class="card hidden">
+    <h2>Pass the phone</h2>
+    <p class="info" style="text-align:center;">
+      Hand the phone to the next player.<br>
+      Tap when ready.
+    </p>
+    <button class="pass-btn" onclick="continueGame()">HAND OVER PHONE</button>
+  </div>
 
-<!-- GAME SCREEN -->
-<div id="game" class="card hidden">
-  <h2 id="turnTitle"></h2>
-  <div class="context" id="contextText"></div>
-  <textarea id="input" placeholder="Write your part of the story..."></textarea>
-  <button onclick="submitTurn()">Submit</button>
-</div>
+  <!-- GAME -->
+  <div id="game" class="card hidden">
+    <h2 id="turnTitle"></h2>
+    <div id="context" class="info"></div>
 
-<!-- END SCREEN -->
-<div id="end" class="card hidden">
-  <h2>The Full Story</h2>
-  <div id="fullStory"></div>
+    <textarea id="input" placeholder="Write your part..."></textarea>
+    <div class="info" id="counter"></div>
 
-  <button class="secondary" onclick="readStory()">🔊 Read Aloud</button>
-  <button onclick="resetGame()">🔁 Play Again</button>
-</div>
-
-</div>
-
-<script>
-const prompts = [
-  "It was the last night before everything changed.",
-  "The message was
+    <button onclick="submitTurn()">Submit</button>
+    <button class="danger" onclick="co
