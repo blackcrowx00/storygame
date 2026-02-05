@@ -6,13 +6,80 @@
 <title>Blind Story</title>
 
 <style>
-body { background:#111; color:#fff; font-family:system-ui; margin:0; }
-.container { max-width:600px; margin:auto; padding:16px; }
-.card { background:#1c1c1c; padding:16px; border-radius:12px; margin-bottom:16px; }
-textarea { width:100%; height:120px; padding:12px; font-size:16px; }
-button { width:100%; padding:16px; margin-top:12px; font-size:18px; }
-.hidden { display:none; }
-.big { font-size:28px; padding:40px; }
+body {
+  background:#0f0f0f;
+  color:#fff;
+  font-family:system-ui, -apple-system;
+  margin:0;
+}
+
+.container {
+  max-width:640px;
+  margin:auto;
+  padding:16px;
+}
+
+h1,h2 {
+  text-align:center;
+}
+
+.card {
+  background:#1b1b1b;
+  padding:16px;
+  border-radius:14px;
+  margin-bottom:16px;
+}
+
+textarea {
+  width:100%;
+  height:140px;
+  padding:12px;
+  font-size:16px;
+  border-radius:10px;
+  border:none;
+  resize:none;
+}
+
+button {
+  width:100%;
+  padding:16px;
+  margin-top:12px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  background:#3b82f6;
+  color:white;
+}
+
+button.secondary {
+  background:#333;
+}
+
+.hidden {
+  display:none;
+}
+
+.context {
+  opacity:0.75;
+  margin-bottom:12px;
+}
+
+/* Fade-in reveal */
+.fade {
+  opacity:0;
+  animation:fadeIn 1s forwards;
+  margin-bottom:8px;
+}
+
+@keyframes fadeIn {
+  to { opacity:1; }
+}
+
+/* Pass screen emphasis */
+.pass-btn {
+  font-size:24px;
+  padding:32px;
+}
 </style>
 </head>
 
@@ -21,6 +88,7 @@ button { width:100%; padding:16px; margin-top:12px; font-size:18px; }
 
 <h1>Blind Story</h1>
 
+<!-- START SCREEN -->
 <div id="start" class="card">
   <label>Rounds per player</label>
   <select id="rounds">
@@ -28,68 +96,45 @@ button { width:100%; padding:16px; margin-top:12px; font-size:18px; }
     <option value="3">3</option>
     <option value="4">4</option>
   </select>
-  <button onclick="startGame()">Start</button>
+
+  <label style="display:block;margin-top:12px;">
+    <input type="checkbox" id="usePrompt" checked>
+    Use opening prompt
+  </label>
+
+  <button onclick="startGame()">Start Game</button>
 </div>
 
+<!-- PASS THE PHONE SCREEN -->
 <div id="pass" class="card hidden">
   <h2>Pass the phone</h2>
-  <button class="big" onclick="continueGame()">HAND OVER PHONE</button>
+  <p style="text-align:center;opacity:0.7;">
+    Hand the phone to the next player.<br>
+    Tap when ready.
+  </p>
+  <button class="pass-btn" onclick="continueGame()">HAND OVER PHONE</button>
 </div>
 
+<!-- GAME SCREEN -->
 <div id="game" class="card hidden">
-  <h2 id="turn"></h2>
-  <div id="context"></div>
-  <textarea id="input"></textarea>
-  <button onclick="submit()">Submit</button>
+  <h2 id="turnTitle"></h2>
+  <div class="context" id="contextText"></div>
+  <textarea id="input" placeholder="Write your part of the story..."></textarea>
+  <button onclick="submitTurn()">Submit</button>
 </div>
 
+<!-- END SCREEN -->
 <div id="end" class="card hidden">
-  <h2>Story</h2>
-  <pre id="story"></pre>
-  <button onclick="reset()">Play Again</button>
+  <h2>The Full Story</h2>
+  <div id="fullStory"></div>
+
+  <button class="secondary" onclick="readStory()">🔊 Read Aloud</button>
+  <button onclick="resetGame()">🔁 Play Again</button>
 </div>
 
 </div>
 
 <script>
-let turns=[], current=0, total=4;
-
-function startGame(){
-  total = +rounds.value * 2;
-  start.classList.add("hidden");
-  pass.classList.remove("hidden");
-}
-
-function continueGame(){
-  pass.classList.add("hidden");
-  game.classList.remove("hidden");
-  update();
-}
-
-function update(){
-  const p = current % 2 ? 2 : 1;
-  turn.textContent = `Player ${p} — Turn ${current+1}/${total}`;
-  context.textContent = turns.length
-    ? "You see: “" + turns.at(-1).slice(-40) + "”"
-    : "Start the story.";
-  input.value="";
-}
-
-function submit(){
-  turns.push(input.value.trim());
-  current++;
-  game.classList.add("hidden");
-  current >= total ? endGame() : pass.classList.remove("hidden");
-}
-
-function endGame(){
-  end.classList.remove("hidden");
-  story.textContent = turns.join(" ");
-}
-
-function reset(){
-  location.reload();
-}
-</script>
-</body>
-</html>
+const prompts = [
+  "It was the last night before everything changed.",
+  "The message was
