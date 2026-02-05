@@ -172,14 +172,15 @@ document.addEventListener("DOMContentLoaded", () => {
   input.addEventListener("input", updateCounter);
 
   function startGame() {
-    roundsPerPlayer = Number(document.getElementById("roundSelect").value);
-    TOTAL_TURNS = roundsPerPlayer * 2;
-    turns = [];
-    currentTurn = 0;
+  roundsPerPlayer = Number(document.getElementById("roundSelect").value);
+  TOTAL_TURNS = roundsPerPlayer * 2;
+  turns = [];
+  currentTurn = 0;
 
-    start.classList.add("hidden");
-    pass.classList.remove("hidden");
-  }
+  start.classList.add("hidden");
+  game.classList.remove("hidden");
+  updateTurnUI();
+}
 
   function continueGame() {
     pass.classList.add("hidden");
@@ -255,3 +256,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
